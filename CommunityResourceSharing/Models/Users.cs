@@ -6,13 +6,13 @@ namespace CommunityResourceSharing.Models
     {
         public int Id { get; set; }
         [Required, MaxLength(100)]
-        public string FullName { get; set; }
+        public string FullName { get; set; } = null!;
 
         [Required, EmailAddress, MaxLength(191)]
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
 
         [Required]
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
 
         [Required]
         public bool isAdmin { get; set; } = false; //role
@@ -20,7 +20,7 @@ namespace CommunityResourceSharing.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        public ICollection<Resource> Resources { get; set; }
-        public ICollection<BorrowRequest> BorrowRequests { get; set; }
+        public ICollection<Resource>? Resources { get; set; }
+        public ICollection<BorrowRequest>? BorrowRequests { get; set; }
     }
 }

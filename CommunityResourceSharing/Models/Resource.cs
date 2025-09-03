@@ -11,13 +11,13 @@ namespace CommunityResourceSharing.Models
         public int Id { get; set; }
 
         [Required, MaxLength(150)]
-        public string Title { get; set; }
+        public string Title { get; set; } = null!;
 
         [MaxLength(500)]
-        public string Description { get; set; }
+        public string Description { get; set; } = null!;
 
         [Required, MaxLength(50)]
-        public string Category { get; set; } // e.g., Books, Tools, Equipment
+        public string Category { get; set; } = null!; // e.g., Books, Tools, Equipment
 
         [Required]
         public string Status { get; set; } = "Available"; // Available, Borrowed, Unavailable
@@ -30,6 +30,6 @@ namespace CommunityResourceSharing.Models
         public Users? Owner { get; set; }
 
         // Navigation
-        public ICollection<BorrowRequest> BorrowRequests { get; set; }
+        public ICollection<BorrowRequest>? BorrowRequests { get; set; }
     }
 }
