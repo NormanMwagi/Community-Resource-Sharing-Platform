@@ -1,6 +1,8 @@
 
 using CommunityResourceSharing.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace CommunityResourceSharing
 {
@@ -14,9 +16,17 @@ namespace CommunityResourceSharing
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(builder.Configuration.GetConnectionString("DbConnection"),
-                 ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DbConnection"))
-                ));
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseMySql(
+                    builder.Configuration.GetConnectionString("DbConnection"),
+                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DbConnection"))
+                )
+            );
+
+
+            builder.Services.AddAuthorization();
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+                .AddEntityFrameworkStores<AppDbContext>();    
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
@@ -26,6 +36,7 @@ namespace CommunityResourceSharing
             {
                 app.MapOpenApi();
             }
+            app.MapIdentityApi<IdentityUser>();
 
             app.UseHttpsRedirection();
 

@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CommunityResourceSharing.Controllers
 {
-    public class UserController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
 

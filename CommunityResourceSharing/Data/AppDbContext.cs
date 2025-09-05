@@ -1,9 +1,11 @@
 ﻿using CommunityResourceSharing.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CommunityResourceSharing.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -16,6 +18,53 @@ namespace CommunityResourceSharing.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Identity User Login configuration
+            modelBuilder.Entity<IdentityUserLogin<string>>(entity =>
+            {
+                entity.Property(l => l.LoginProvider)
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar(128)")
+                    .HasCharSet("utf8mb4");  // changed to utf8mb4
+
+                entity.Property(l => l.ProviderKey)
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar(128)")
+                    .HasCharSet("utf8mb4");  // changed to utf8mb4
+
+                entity.Property(l => l.UserId).HasMaxLength(128);
+            });
+
+            // Identity User Token configuration
+            modelBuilder.Entity<IdentityUserToken<string>>(entity =>
+            {
+                entity.Property(t => t.LoginProvider)
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar(128)")
+                    .HasCharSet("utf8mb4");  // changed
+
+                entity.Property(t => t.Name)
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar(128)")
+                    .HasCharSet("utf8mb4");  // changed
+
+                entity.Property(t => t.UserId).HasMaxLength(128);
+            });
+
+            // Identity User Role configuration
+            modelBuilder.Entity<IdentityUserRole<string>>(entity =>
+            {
+                entity.Property(ur => ur.UserId)
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar(128)")
+                    .HasCharSet("utf8mb4");  // changed
+
+                entity.Property(ur => ur.RoleId)
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar(128)")
+                    .HasCharSet("utf8mb4");  // changed
+            });
+
             modelBuilder.Entity<Users>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
