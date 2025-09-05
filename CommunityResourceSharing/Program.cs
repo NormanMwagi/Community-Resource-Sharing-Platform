@@ -28,6 +28,7 @@ namespace CommunityResourceSharing
             builder.Services.AddIdentityApiEndpoints<IdentityUser>()
                 .AddEntityFrameworkStores<AppDbContext>();    
             builder.Services.AddOpenApi();
+            builder.Services.AddAutoMapper(typeof(Program));
 
             var app = builder.Build();
 

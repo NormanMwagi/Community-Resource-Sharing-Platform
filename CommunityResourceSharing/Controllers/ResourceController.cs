@@ -1,4 +1,5 @@
-﻿using CommunityResourceSharing.Data;
+﻿using AutoMapper;
+using CommunityResourceSharing.Data;
 using CommunityResourceSharing.DTOs;
 using CommunityResourceSharing.Models;
 using Microsoft.AspNetCore.Http;
@@ -12,15 +13,18 @@ namespace CommunityResourceSharing.Controllers
     public class ResourceController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public ResourceController(AppDbContext context)
+        private readonly IMapper _mapper;
+        public ResourceController(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ResourceDto>>> GetResource()
         {
-            var resources = await _context.Resources.ToListAsync();
-            return Ok(resources);
+            var resources = await _context.Resources
+                .ToListAsync();
+            return Ok(_mapper.Map<List<ResourceDto>>(resources));
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<ResourceDto>> GetResourceById(int id)
@@ -29,46 +33,20 @@ namespace CommunityResourceSharing.Controllers
             if (resource == null)
                 return NotFound();
 
-            var dto = new ResourceDto
-            {
-                Id = resource.Id,
-                Title = resource.Title,
-                Description = resource.Description,
-                Category = resource.Category,
-                Status = resource.Status,
-                OwnerId = resource.OwnerId,
-                CreatedAt = resource.CreatedAt
-            };
-
-            return Ok(dto);
+            return Ok(_mapper.Map<ResourceDto>(resource));
         }
         [HttpPost]
         public async Task<ActionResult<ResourceDto>> AddResource(ResourceDto resourceDto)
         {
-            var newResource = new Resource
-            {
-                Title = resourceDto.Title,
-                Description = resourceDto.Description,
-                Category = resourceDto.Category,
-                Status = resourceDto.Status,
-                OwnerId = resourceDto.OwnerId,
-                CreatedAt = DateTime.UtcNow
-            };
+            var newResource = _mapper.Map<Resource>(resourceDto);
+            newResource.CreatedAt = DateTime.UtcNow;
+
 
             await _context.Resources.AddAsync(newResource);
             await _context.SaveChangesAsync();
-
             // Map back to DTO (so response includes Id)
-            var createdDto = new ResourceDto
-            {
-                Id = newResource.Id,
-                Title = newResource.Title,
-                Description = newResource.Description,
-                Category = newResource.Category,
-                Status = newResource.Status,
-                OwnerId = newResource.OwnerId,
-                CreatedAt = newResource.CreatedAt
-            };
+         
+            var createdDto = _mapper.Map<ResourceDto>(newResource);
 
             // Return 201 Created with location header
             return CreatedAtAction(nameof(GetResourceById),
@@ -89,10 +67,8 @@ namespace CommunityResourceSharing.Controllers
                 return NotFound();
             }
 
-            existingResource.Title = resourceDto.Title;
-            existingResource.Description = resourceDto.Description;
-            existingResource.Category = resourceDto.Category;
-            existingResource.Status = resourceDto.Status;
+            _mapper.Map(resourceDto, existingResource);
+            resourceDto.CreatedAt = existingResource.CreatedAt;
 
             try
             {
@@ -111,16 +87,7 @@ namespace CommunityResourceSharing.Controllers
             }
 
             // Map back to DTO for response
-            var updatedDto = new ResourceDto
-            {
-                Id = existingResource.Id,
-                Title = existingResource.Title,
-                Description = existingResource.Description,
-                Category = existingResource.Category,
-                Status = existingResource.Status,
-                OwnerId = existingResource.OwnerId,
-                CreatedAt = existingResource.CreatedAt
-            };
+            _mapper.Map<ResourceDto>(existingResource);
 
             return NoContent();
         }
