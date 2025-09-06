@@ -1,4 +1,5 @@
-﻿using CommunityResourceSharing.Data;
+﻿using AutoMapper;
+using CommunityResourceSharing.Data;
 using CommunityResourceSharing.DTOs;
 using CommunityResourceSharing.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,12 @@ namespace CommunityResourceSharing.Controllers
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public UserController(AppDbContext context)
+        public UserController(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // ✅ GET all users
@@ -22,17 +25,9 @@ namespace CommunityResourceSharing.Controllers
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
             var users = await _context.Users
-                .Select(u => new UserDto
-                {
-                    Id = u.Id,
-                    FullName = u.FullName,
-                    Email = u.Email,
-                    IsAdmin = u.isAdmin,
-                    CreatedAt = u.CreatedAt
-                })
                 .ToListAsync();
 
-            return Ok(users);
+            return Ok(_mapper.Map<List<UserDto>>(users));
         }
 
         // ✅ GET user by ID
@@ -42,14 +37,7 @@ namespace CommunityResourceSharing.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound();
 
-            var dto = new UserDto
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                IsAdmin = user.isAdmin,
-                CreatedAt = user.CreatedAt
-            };
+            var dto = _mapper.Map<UserDto>(user);
 
             return Ok(dto);
         }
@@ -58,26 +46,12 @@ namespace CommunityResourceSharing.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser(CreateUserDto dto)
         {
-            var newUser = new Users
-            {
-                FullName = dto.FullName,
-                Email = dto.Email,
-                Password = dto.Password, // TODO: hash before saving
-                isAdmin = dto.IsAdmin,
-                CreatedAt = DateTime.UtcNow
-            };
+            var newUser = _mapper.Map<Users>(dto);
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            var result = new UserDto
-            {
-                Id = newUser.Id,
-                FullName = newUser.FullName,
-                Email = newUser.Email,
-                IsAdmin = newUser.isAdmin,
-                CreatedAt = newUser.CreatedAt
-            };
+            var result = _mapper.Map<UserDto>(newUser);
 
             return CreatedAtAction(nameof(GetUser), new { id = result.Id }, result);
         }
@@ -89,21 +63,25 @@ namespace CommunityResourceSharing.Controllers
             var existingUser = await _context.Users.FindAsync(id);
             if (existingUser == null) return NotFound();
 
-            existingUser.FullName = dto.FullName;
-            existingUser.Email = dto.Email;
-            existingUser.Password = dto.Password; // again, hash ideally
-            existingUser.isAdmin = dto.IsAdmin;
-
-            await _context.SaveChangesAsync();
-
-            var updated = new UserDto
+            _mapper.Map(dto, existingUser);
+            existingUser.Id = id; // Ensure ID remains unchanged
+            try
             {
-                Id = existingUser.Id,
-                FullName = existingUser.FullName,
-                Email = existingUser.Email,
-                IsAdmin = existingUser.isAdmin,
-                CreatedAt = existingUser.CreatedAt
-            };
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Users.Any(e => e.Id == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            var updated = _mapper.Map<CreateUserDto>(existingUser);
 
             return Ok(updated);
         }

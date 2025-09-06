@@ -1,4 +1,5 @@
-﻿using CommunityResourceSharing.Data;
+﻿using AutoMapper;
+using CommunityResourceSharing.Data;
 using CommunityResourceSharing.DTOs;
 using CommunityResourceSharing.Models;
 using Microsoft.AspNetCore.Http;
@@ -11,23 +12,19 @@ namespace CommunityResourceSharing.Controllers
     [ApiController]
     public class BorrowController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly AppDbContext _context;
-        public BorrowController(AppDbContext context) {
+        public BorrowController(AppDbContext context, IMapper mapper) {
             _context = context;
+            _mapper = mapper;
         }
         [HttpGet] 
         public async Task<ActionResult<IEnumerable<BorrowRequestDto>>> GetBorrowRequests()
         {
-            var borrowReq = await _context.BorrowRequests.Select(x => new BorrowRequestDto
-            {
-                Id = x.Id,
-                ResourceId = x.ResourceId,
-                BorrowerId = x.BorrowerId,
-                Status = x.Status
-            })
+            var borrowReq = await _context.BorrowRequests
              .ToListAsync();
 
-            return Ok(borrowReq);
+            return Ok(_mapper.Map<List<BorrowRequestDto>>(borrowReq));
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<BorrowRequestDto>> GetBorrowRequests(int id)
@@ -36,34 +33,17 @@ namespace CommunityResourceSharing.Controllers
             if (request == null)
                 return NotFound();
 
-            var reqDto = new BorrowRequestDto
-            {
-                Id = request.Id,
-                ResourceId = request.ResourceId,
-                BorrowerId = request.BorrowerId,
-                Status = request.Status
-            };
+            var reqDto = _mapper.Map<BorrowRequestDto>(request);
 
             return Ok(reqDto);
         }
         [HttpPost]
         public async Task<ActionResult> AddBorrowRequest(BorrowRequestDto borrowRequestDto)
         {
-            var req = new BorrowRequest
-            {
-                ResourceId = borrowRequestDto.ResourceId,
-                BorrowerId = borrowRequestDto.BorrowerId,
-                Status = borrowRequestDto.Status
-            };
+            var req = _mapper.Map<BorrowRequest>(borrowRequestDto);
             await _context.BorrowRequests.AddAsync(req);
             await _context.SaveChangesAsync();
-            var result = new BorrowRequestDto
-            {
-                Id = req.Id,
-                ResourceId = req.ResourceId,
-                BorrowerId = req.BorrowerId,
-                Status = req.Status
-            };
+            var result = _mapper.Map<BorrowRequestDto>(req);
             return CreatedAtAction(nameof(GetBorrowRequests),
                 new { id = result.Id }, result);
         }
@@ -79,9 +59,7 @@ namespace CommunityResourceSharing.Controllers
             {
                 return NotFound();
             }
-            existingReq.ResourceId = borrowRequestDto.ResourceId;
-            existingReq.BorrowerId = borrowRequestDto.BorrowerId;
-            existingReq.Status = borrowRequestDto.Status;
+            _mapper.Map(borrowRequestDto, existingReq);
 
             try
             {
@@ -100,12 +78,7 @@ namespace CommunityResourceSharing.Controllers
                     throw;
                 }
             }
-            var result = new BorrowRequestDto
-            {
-                ResourceId = existingReq.ResourceId,
-                BorrowerId = existingReq.BorrowerId,
-                Status = existingReq.Status
-            };
+            var result = _mapper.Map<BorrowRequestDto>(existingReq);
 
             return NoContent();
 
