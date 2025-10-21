@@ -27,7 +27,7 @@ namespace CommunityResourceSharing.Models
         // Foreign key
         public int? OwnerId { get; set; }
         [ForeignKey("OwnerId")]
-        public Users? Owner { get; set; }        // Navigation
+        public AppUser? Owner { get; set; }        // Navigation
         public ICollection<BorrowRequest>? BorrowRequests { get; set; }
     }
 }

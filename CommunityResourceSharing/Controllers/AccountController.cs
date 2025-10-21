@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CommunityResourceSharing.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +9,6 @@ namespace CommunityResourceSharing.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-
-
-
-
-
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
 
@@ -30,7 +26,11 @@ namespace CommunityResourceSharing.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+            var user = new AppUser { 
+                UserName = model.Email, 
+                Email = model.Email,
+                FullName = model.FullName
+            };
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -66,12 +66,14 @@ namespace CommunityResourceSharing.Controllers
     {
         public string Email { get; set; }
         public string Password { get; set; }
+        public string FullName { get; set; }
     }
 
     public class LoginDto
     {
         public string Email { get; set; }
         public string Password { get; set; }
+        public string FullName { get; set; }
     }
 
 }

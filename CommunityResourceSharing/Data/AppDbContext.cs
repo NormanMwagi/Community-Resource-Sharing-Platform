@@ -12,7 +12,6 @@ namespace CommunityResourceSharing.Data
 
         }
         public DbSet<Resource> Resources { get; set; }
-        public DbSet<Users> Users { get; set; }
         public DbSet<BorrowRequest> BorrowRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -65,26 +64,13 @@ namespace CommunityResourceSharing.Data
                     .HasCharSet("utf8mb4");  // changed
             });
 
-            modelBuilder.Entity<Users>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+         
 
             modelBuilder.Entity<Resource>().HasOne(r => r.Owner).
                 WithMany(y => y.Resources)
                 .HasForeignKey(s => s.OwnerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Seed User (Owner)
-            modelBuilder.Entity<Users>().HasData(
-                new Users
-                {
-                    Id = 1,
-                    FullName = "Admin User",
-                    Email = "admin@example.com",
-                    Password = "hashedpassword123", // Replace with a hashed password ideally
-                    isAdmin = true,
-                    CreatedAt = DateTime.UtcNow
-                });
 
             // Seed Resource (Owned by Admin User)
             modelBuilder.Entity<Resource>().HasData(

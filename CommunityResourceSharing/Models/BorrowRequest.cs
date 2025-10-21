@@ -14,7 +14,7 @@ namespace CommunityResourceSharing.Models
 
         public int? BorrowerId { get; set; }
         [ForeignKey("BorrowerId")]
-        public Users? Borrower { get; set; }
+        public AppUser? Borrower { get; set; }
 
         [Required]
         public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected, Returned

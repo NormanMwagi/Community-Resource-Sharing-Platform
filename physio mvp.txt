@@ -1,0 +1,70 @@
+🏗️ Simplified MVP Flow
+
+React Frontend
+
+Home page (intro + contact info).
+
+Services page (list of available physiotherapy services).
+
+Booking form (choose service, pick date & time, enter name/email/phone).
+
+Confirmation page after booking.
+
+Node Backend (Express)
+
+Receives booking requests.
+
+Validates date/time (optional in MVP).
+
+Saves booking into PostgreSQL.
+
+Sends email/WhatsApp notification to physiotherapist (optional for MVP).
+
+PostgreSQL Database
+
+Just two core tables: services + appointments.
+
+📊 PostgreSQL Tables (No Auth)
+services
+id SERIAL PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+description TEXT,
+price NUMERIC(10,2),
+duration_minutes INT NOT NULL
+
+appointments
+id SERIAL PRIMARY KEY,
+client_name VARCHAR(100) NOT NULL,
+client_email VARCHAR(100) NOT NULL,
+client_phone VARCHAR(20),
+service_id INT REFERENCES services(id) ON DELETE CASCADE,
+appointment_date DATE NOT NULL,
+appointment_time TIME NOT NULL,
+status VARCHAR(20) DEFAULT 'pending', -- pending | confirmed | cancelled
+created_at TIMESTAMP DEFAULT NOW()
+
+🚀 API Endpoints (No Auth)
+
+Services
+
+GET /api/services → list services
+
+Appointments
+
+POST /api/appointments → create new booking
+
+GET /api/appointments → (admin dashboard later, but can skip in MVP)
+
+✅ Advantages of Skipping Auth for MVP
+
+Less complexity (no JWT, sessions, password hashing).
+
+Faster to deploy and test with real clients.
+
+Clients don’t need an account → fewer drop-offs.
+
+Later, when you want:
+
+Clients to manage/cancel bookings → add auth.
+
+Admin dashboard → add secure login.

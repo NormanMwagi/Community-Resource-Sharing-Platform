@@ -1,19 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace CommunityResourceSharing.Models
 {
-    public class Users
+    public class AppUser : IdentityUser
     {
-        public int Id { get; set; }
         [Required, MaxLength(100)]
         public string FullName { get; set; } = null!;
-
-        [Required, EmailAddress, MaxLength(191)]
-        public string Email { get; set; } = null!;
-
-        [Required]
-        public string Password { get; set; } = null!;
-
         [Required]
         public bool isAdmin { get; set; } = false; //role
 

@@ -1,0 +1,78 @@
+📅 36-Hour Timeline
+
+Day 1 (~18 hrs)
+
+Setup (2 hrs): Vite + Tailwind + Router + Context.
+
+Navbar & Routing (2 hrs): Links to Home, Products, Cart, Login.
+
+Product Listing (4 hrs): Fetch products, display grid, loader, error handling.
+
+Search & Filter (3 hrs): Category filter, search box, sorting dropdown.
+
+Product Detail Page (3 hrs): Dynamic routing, fetch single product.
+
+Basic Styling (4 hrs): Tailwind layouts, responsive grid.
+
+Day 2 (~18 hrs)
+
+Cart System (5 hrs): Context, add/remove, update qty, persist in localStorage.
+
+Checkout Flow (4 hrs): Form validation, mock order summary.
+
+Authentication (3 hrs): Simple login page, protect checkout route.
+
+Polish UI (2 hrs): Dark mode toggle, nicer buttons/cards.
+
+Testing (2 hrs, optional): Write 2–3 unit tests.
+
+Final QA (2 hrs): Fix bugs, responsive tweaks, cleanup.
+
+✨ What You’ll Be Able to Talk About
+
+React Fundamentals → props, state, hooks, conditional rendering.
+
+Routing → dynamic routes (/products/:id), protected routes.
+
+State Management → Context API for cart & auth.
+
+API Integration → fetching, error/loading states.
+
+Forms → controlled inputs, validation.
+
+Persistence → localStorage.
+
+UI/UX → responsive design, search/filter/sort.
+
+🛒 Mini E-Commerce Store (Redux Version)
+✅ Features with Redux
+
+Products Slice
+
+Fetch products from Fake Store API.
+
+Store product list in Redux state.
+
+Support search/filter/sort in state.
+
+Cart Slice
+
+Add/remove items.
+
+Update quantity.
+
+Store cart in Redux + persist with localStorage.
+
+Auth Slice
+
+Mock login/logout.
+
+Store JWT in Redux + localStorage.
+
+Protect routes with state.
+
+UI Slice (Optional)
+
+Dark mode toggle.
+
+Loading/error states.
