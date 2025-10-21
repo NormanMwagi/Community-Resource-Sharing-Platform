@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace CommunityResourceSharing.Controllers
 {
@@ -9,11 +13,11 @@ namespace CommunityResourceSharing.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public AccountController(UserManager<IdentityUser> userManager,
-                                 SignInManager<IdentityUser> signInManager)
+        public AccountController(UserManager<AppUser> userManager,
+                                 SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -35,8 +39,9 @@ namespace CommunityResourceSharing.Controllers
 
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
+            var token = GenerateJwtToken(user.UserName);
 
-            return Ok(new { message = "User registered successfully" });
+            return Ok(new { token, message = "User registered successfully" });
         }
 
         // POST: api/account/login
@@ -58,6 +63,24 @@ namespace CommunityResourceSharing.Controllers
         {
             await _signInManager.SignOutAsync();
             return Ok(new { message = "Logged out successfully" });
+        }
+        public string GenerateJwtToken(string username)
+        {
+            var claims = new List<Claim> {
+                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Email, username ?? ""),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_super_secret_key"));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                issuer: "yourdomain.com",
+                audience: "yourdomain.com",
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: creds
+                );
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 

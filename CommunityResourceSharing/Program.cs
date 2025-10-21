@@ -1,7 +1,10 @@
 ﻿
 using CommunityResourceSharing.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 namespace CommunityResourceSharing
@@ -29,8 +32,22 @@ namespace CommunityResourceSharing
                 .AddEntityFrameworkStores<AppDbContext>();    
             builder.Services.AddOpenApi();
             builder.Services.AddAutoMapper(typeof(Program));
-
-            builder.Services.AddSwaggerGen(); // 👈 Add this
+            //jwt
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = "yourdomain.com",
+                        ValidAudience = "yourdomain.com",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_super_secret_key"))
+                    };
+              });
+            builder.Services.AddSwaggerGen(); // swagger
 
             var app = builder.Build();
 
@@ -38,7 +55,7 @@ namespace CommunityResourceSharing
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
-                app.UseSwagger(); // 👈 Enable Swagger middleware
+                app.UseSwagger(); //Enable Swagger
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Community Resource Sharing API V1");
@@ -51,7 +68,7 @@ namespace CommunityResourceSharing
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
+            app.UseAuthentication();
 
             app.MapControllers();
 
