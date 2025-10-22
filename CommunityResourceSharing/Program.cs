@@ -1,5 +1,6 @@
 ﻿
 using CommunityResourceSharing.Data;
+using CommunityResourceSharing.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,7 @@ namespace CommunityResourceSharing
 
 
             builder.Services.AddAuthorization();
-            builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+            builder.Services.AddIdentityApiEndpoints<AppUser>()
                 .AddEntityFrameworkStores<AppDbContext>();    
             builder.Services.AddOpenApi();
             builder.Services.AddAutoMapper(typeof(Program));
@@ -63,7 +64,7 @@ namespace CommunityResourceSharing
                 });
 
             }
-            app.MapIdentityApi<IdentityUser>();
+            //app.MapIdentityApi<IdentityUser>();
 
             app.UseHttpsRedirection();
 

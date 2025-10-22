@@ -15,12 +15,15 @@ namespace CommunityResourceSharing.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        IConfiguration _configuration;
 
         public AccountController(UserManager<AppUser> userManager,
-                                 SignInManager<AppUser> signInManager)
+                                 SignInManager<AppUser> signInManager, 
+                                 IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _configuration = configuration;
         }
 
         // POST: api/account/register
@@ -33,13 +36,18 @@ namespace CommunityResourceSharing.Controllers
             var user = new AppUser { 
                 UserName = model.Email, 
                 Email = model.Email,
-                FullName = model.FullName
+                FullName = model.FullName,
+                isAdmin = false
             };
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
-            var token = GenerateJwtToken(user.UserName);
+
+            await _userManager.AddToRoleAsync(user, "User");
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var token = GenerateJwtToken(user, roles);
 
             return Ok(new { token, message = "User registered successfully" });
         }
@@ -48,13 +56,18 @@ namespace CommunityResourceSharing.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
-            var result = await _signInManager.PasswordSignInAsync(
-                model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
-
+            //get user
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return Unauthorized(new { message = "Invalid login credentials" });
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
             if (!result.Succeeded)
-                return Unauthorized(new { message = "Invalid login attempt" });
+                return Unauthorized(new { message = "Invalid login credentials" });
+           
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = GenerateJwtToken(user, roles);
 
-            return Ok(new { message = "Login successful" });
+            return Ok(new { token, message = "Login successful" });
         }
 
         // POST: api/account/logout
@@ -64,20 +77,23 @@ namespace CommunityResourceSharing.Controllers
             await _signInManager.SignOutAsync();
             return Ok(new { message = "Logged out successfully" });
         }
-        public string GenerateJwtToken(string username)
+        public string GenerateJwtToken(AppUser user, IList<string> roles)
         {
             var claims = new List<Claim> {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
-                new Claim(JwtRegisteredClaimNames.Email, username ?? ""),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
+                new Claim(ClaimTypes.Name, user.UserName ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_super_secret_key"));
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
-                issuer: "yourdomain.com",
-                audience: "yourdomain.com",
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
+                expires: DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMuntes")) ,
                 signingCredentials: creds
                 );
             return new JwtSecurityTokenHandler().WriteToken(token);
