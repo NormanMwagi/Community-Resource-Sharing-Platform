@@ -1,8 +1,8 @@
 # Build results
-bin/
-obj/
-out/
-*.exe
+CommunityResourceSharing/bin/
+CommunityResourceSharing/obj/
+CommunityResourceSharing/out/
+CommunityResourceSharing/*.exe
 *.dll
 *.pdb
 *.cache
@@ -15,8 +15,8 @@ out/
 *.sln.docstates
 
 # Visual Studio files
-.vs/
-.vscode/
+CommunityResourceSharing/.vs/
+CommunityResourceSharing/.vscode/
 
 # NuGet packages
 *.nupkg
@@ -31,7 +31,7 @@ _ReSharper*/
 *.DotSettings
 
 # Entity Framework
-Migrations/
+CommunityResourceSharing/Migrations/
 
 # ASP.NET artifacts
 wwwroot/lib/
@@ -44,23 +44,26 @@ npm-debug.log
 yarn-error.log
 
 # Publish outputs
-publish/
-*.Publish.xml
+CommunityResourceSharing/publish/
+CommunityResourceSharing/*.Publish.xml
 
 # Secrets / config
-appsettings.Development.json
-appsettings.*.local.json
-secrets.json
+# Ignore all appsettings files (including nested ones)
+appsettings.json
+appsettings.*.json
+CommunityResourceSharing/appsettings.json
+CommunityResourceSharing/appsettings.*.json
+CommunityResourceSharing/secrets.json
 
 # Logs
-logs/
-*.log
+CommunityResourceSharing/logs/
+CommunityResourceSharing/*.log
 
 # Docker
-*.dockerfile
-*.dockerignore
+CommunityResourceSharing/*.dockerfile
+CommunityResourceSharing/*.dockerignore
 
 # OS-specific
-.DS_Store
-Thumbs.db
-desktop.ini
+CommunityResourceSharing/.DS_Store
+CommunityResourceSharing/Thumbs.db
+CommunityResourceSharing/desktop.ini
