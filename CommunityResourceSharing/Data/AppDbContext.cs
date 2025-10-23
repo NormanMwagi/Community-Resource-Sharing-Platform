@@ -69,22 +69,22 @@ namespace CommunityResourceSharing.Data
             modelBuilder.Entity<Resource>().HasOne(r => r.Owner).
                 WithMany(y => y.Resources)
                 .HasForeignKey(s => s.OwnerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
 
-            // Seed Resource (Owned by Admin User)
-            modelBuilder.Entity<Resource>().HasData(
-                new Resource
-                {
-                    Id = 1,
-                    Title = "Book",
-                    Description = "Encyclopedia",
-                    Category = "Books",
-                    Status = "Available",
-                    OwnerId = 1,
-                    CreatedAt = DateTime.UtcNow
-                }
-            );
+            //// Seed Resource (Owned by Admin User)
+            //modelBuilder.Entity<Resource>().HasData(
+            //    new Resource
+            //    {
+            //        Id = 1,
+            //        Title = "Book",
+            //        Description = "Encyclopedia",
+            //        Category = "Books",
+            //        Status = "Available",
+            //        OwnerId = "1",
+            //        CreatedAt = DateTime.UtcNow
+            //    }
+            //);
 
             modelBuilder.Entity<BorrowRequest>()
                 .HasOne(br => br.Resource)

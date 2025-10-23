@@ -25,7 +25,7 @@ namespace CommunityResourceSharing.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Foreign key
-        public int? OwnerId { get; set; }
+        public string? OwnerId { get; set; }
         [ForeignKey("OwnerId")]
         public AppUser? Owner { get; set; }        // Navigation
         public ICollection<BorrowRequest>? BorrowRequests { get; set; }

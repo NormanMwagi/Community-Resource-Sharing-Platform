@@ -14,9 +14,9 @@ CommunityResourceSharing/*.exe
 *.userosscache
 *.sln.docstates
 
-# Visual Studio files
-CommunityResourceSharing/.vs/
-CommunityResourceSharing/.vscode/
+# Visual Studio 
+.vs/
+.vscode/
 
 # NuGet packages
 *.nupkg
@@ -60,9 +60,13 @@ CommunityResourceSharing/logs/
 CommunityResourceSharing/*.log
 
 # Docker
-CommunityResourceSharing/*.dockerfile
+CommunityResourceSharing/Dockerfile
+CommunityResourceSharing/.Dockerfile
+CommunityResourceSharing/.dockerfile
+CommunityResourceSharing/dockerfile
 CommunityResourceSharing/*.dockerignore
-
+*.dockerignore
+*.dockerfile
 # OS-specific
 CommunityResourceSharing/.DS_Store
 CommunityResourceSharing/Thumbs.db

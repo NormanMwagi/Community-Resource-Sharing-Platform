@@ -2,6 +2,7 @@
 using CommunityResourceSharing.Data;
 using CommunityResourceSharing.DTOs;
 using CommunityResourceSharing.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ namespace CommunityResourceSharing.Controllers
 
             return Ok(_mapper.Map<ResourceDto>(resource));
         }
+        
         [HttpPost]
         public async Task<ActionResult<ResourceDto>> AddResource(ResourceDto resourceDto)
         {
@@ -52,7 +54,7 @@ namespace CommunityResourceSharing.Controllers
             return CreatedAtAction(nameof(GetResourceById),
                 new { id = createdDto.Id }, createdDto);
         }
-
+        [Authorize (Roles = "User,Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ResourceDto>> UpdateResource(int id, ResourceDto resourceDto)
         {
@@ -91,6 +93,7 @@ namespace CommunityResourceSharing.Controllers
 
             return NoContent();
         }
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteResource(int id)
         {

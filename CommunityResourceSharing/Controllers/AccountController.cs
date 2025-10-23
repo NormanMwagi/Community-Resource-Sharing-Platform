@@ -39,7 +39,7 @@ namespace CommunityResourceSharing.Controllers
                 FullName = model.FullName,
                 isAdmin = false
             };
-            var result = await _userManager.CreateAsync(user, model.Password);
+             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
@@ -77,7 +77,7 @@ namespace CommunityResourceSharing.Controllers
             await _signInManager.SignOutAsync();
             return Ok(new { message = "Logged out successfully" });
         }
-        public string GenerateJwtToken(AppUser user, IList<string> roles)
+        private string GenerateJwtToken(AppUser user, IList<string> roles)
         {
             var claims = new List<Claim> {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
@@ -112,7 +112,6 @@ namespace CommunityResourceSharing.Controllers
     {
         public string Email { get; set; }
         public string Password { get; set; }
-        public string FullName { get; set; }
     }
 
 }

@@ -12,7 +12,7 @@ namespace CommunityResourceSharing.Models
         [ForeignKey("ResourceId")]
         public Resource? Resource { get; set; }
 
-        public int? BorrowerId { get; set; }
+        public string? BorrowerId { get; set; }
         [ForeignKey("BorrowerId")]
         public AppUser? Borrower { get; set; }
 
