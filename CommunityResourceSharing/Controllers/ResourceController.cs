@@ -20,6 +20,7 @@ namespace CommunityResourceSharing.Controllers
             _context = context;
             _mapper = mapper;
         }
+        [Authorize(Roles = "User, Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ResourceDto>>> GetResource()
         {
@@ -27,6 +28,7 @@ namespace CommunityResourceSharing.Controllers
                 .ToListAsync();
             return Ok(_mapper.Map<List<ResourceDto>>(resources));
         }
+        [Authorize(Roles = "User, Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ResourceDto>> GetResourceById(int id)
         {
@@ -37,6 +39,7 @@ namespace CommunityResourceSharing.Controllers
             return Ok(_mapper.Map<ResourceDto>(resource));
         }
         
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public async Task<ActionResult<ResourceDto>> AddResource(ResourceDto resourceDto)
         {
@@ -89,11 +92,12 @@ namespace CommunityResourceSharing.Controllers
             }
 
             // Map back to DTO for response
-            _mapper.Map<ResourceDto>(existingResource);
+            var updatedResource =_mapper.Map<ResourceDto>(existingResource);
 
-            return NoContent();
+            //return NoContent();
+            return Ok(updatedResource);
         }
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteResource(int id)
         {

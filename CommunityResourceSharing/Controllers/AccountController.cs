@@ -15,7 +15,7 @@ namespace CommunityResourceSharing.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
         public AccountController(UserManager<AppUser> userManager,
                                  SignInManager<AppUser> signInManager, 

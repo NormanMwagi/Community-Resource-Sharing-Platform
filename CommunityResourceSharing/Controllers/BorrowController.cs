@@ -2,6 +2,7 @@
 using CommunityResourceSharing.Data;
 using CommunityResourceSharing.DTOs;
 using CommunityResourceSharing.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace CommunityResourceSharing.Controllers
             _context = context;
             _mapper = mapper;
         }
+        [Authorize(Roles = "User, Admin")]
         [HttpGet] 
         public async Task<ActionResult<IEnumerable<BorrowRequestDto>>> GetBorrowRequests()
         {
@@ -26,6 +28,7 @@ namespace CommunityResourceSharing.Controllers
 
             return Ok(_mapper.Map<List<BorrowRequestDto>>(borrowReq));
         }
+        [Authorize(Roles = "User, Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<BorrowRequestDto>> GetBorrowRequests(int id)
         {
@@ -37,6 +40,7 @@ namespace CommunityResourceSharing.Controllers
 
             return Ok(reqDto);
         }
+        [Authorize(Roles = "User, Admin")]
         [HttpPost]
         public async Task<ActionResult> AddBorrowRequest(BorrowRequestDto borrowRequestDto)
         {
@@ -47,6 +51,7 @@ namespace CommunityResourceSharing.Controllers
             return CreatedAtAction(nameof(GetBorrowRequests),
                 new { id = result.Id }, result);
         }
+        [Authorize(Roles = "User, Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBorrowRequest(int id, BorrowRequestDto borrowRequestDto)
         {
@@ -83,6 +88,7 @@ namespace CommunityResourceSharing.Controllers
             return NoContent();
 
         }
+        [Authorize(Roles = "User, Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteBorrowRequest(int id)
         {

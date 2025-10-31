@@ -1,4 +1,3 @@
-﻿
 using CommunityResourceSharing.Data;
 using CommunityResourceSharing.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
-
 
 namespace CommunityResourceSharing
 {
@@ -20,7 +18,17 @@ namespace CommunityResourceSharing
 
             // Add services to the container.
             builder.Services.AddControllers();
-           
+            // CORS - allow Authorization header and methods used by API (restrict origins in production)
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("DefaultCorsPolicy", policy =>
+                {
+                    policy.AllowAnyOrigin() // replace with WithOrigins("https://yourclient") in production
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .WithExposedHeaders("Content-Disposition");
+                });
+            });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(
@@ -39,7 +47,8 @@ namespace CommunityResourceSharing
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
             })
-            .AddEntityFrameworkStores<AppDbContext>();
+            .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
             builder.Services.AddOpenApi();
             builder.Services.AddAutoMapper(typeof(Program));
@@ -48,29 +57,51 @@ namespace CommunityResourceSharing
             var issuer = jwtSettings["Issuer"];
             var audience = jwtSettings["Audience"];
             var secretKey = jwtSettings["SecretKey"];
-            //jwt
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }
-                )
+            //jwt - add diagnostic events so we can see why tokens are rejected
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.SaveToken = true;
-                    options.RequireHttpsMetadata = false;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
+                        ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = issuer,
                         ValidAudience = audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey!))                    
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+                        RoleClaimType = ClaimTypes.Role 
+                    };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = ctx =>
+                        {
+                            Console.WriteLine("JwtEvents: OnMessageReceived. Authorization header? " +
+                                ctx.Request.Headers.ContainsKey("Authorization"));
+                            var auth = ctx.Request.Headers["Authorization"].FirstOrDefault();
+                            Console.WriteLine("JwtEvents: Raw Authorization header: " + (auth ?? "<null>"));
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = ctx =>
+                        {
+                            Console.WriteLine("JwtEvents: OnTokenValidated. Identity.Name: " + ctx.Principal?.Identity?.Name);
+                            foreach (var c in ctx.Principal?.Claims ?? Enumerable.Empty<System.Security.Claims.Claim>())
+                                Console.WriteLine($"  Claim: {c.Type} = {c.Value}");
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = ctx =>
+                        {
+                            Console.WriteLine("JwtEvents: OnAuthenticationFailed: " + ctx.Exception?.GetType().Name + " - " + ctx.Exception?.Message);
+                            return Task.CompletedTask;
+                        },
+                        OnChallenge = context =>
+                        {
+                            Console.WriteLine($"JwtEvents: OnChallenge. Error: {context.Error}, Description: {context.ErrorDescription}");
+                            return Task.CompletedTask;
+                        }
                     };
               });
-
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -80,7 +111,7 @@ namespace CommunityResourceSharing
                     Description = "API for managing resources and borrowing requests within the community."
                 });
 
-                // ✅ Add JWT Authentication to Swagger
+                // ? Add JWT Authentication to Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -133,12 +164,20 @@ namespace CommunityResourceSharing
             //app.MapIdentityApi<IdentityUser>();
 
             app.UseHttpsRedirection();
+
+            // Log incoming Authorization header (kept for debugging)
             app.Use(async (context, next) =>
             {
-                Console.WriteLine($"Auth Header: {context.Request.Headers["Authorization"]}");
+                Console.WriteLine($"Auth Header: {context.Request.Headers[\"Authorization\"]}");
                 await next();
             });
-          
+
+            // Ensure routing is enabled before auth so endpoint metadata is available
+            app.UseRouting();
+
+            // IMPORTANT: UseCors must run early (before auth) so preflight (OPTIONS) is handled without authentication
+            app.UseCors("DefaultCorsPolicy");
+
             app.UseAuthentication();
             app.UseAuthorization();
            
@@ -197,4 +236,4 @@ namespace CommunityResourceSharing
             }
         }
     }
-}
+}                   

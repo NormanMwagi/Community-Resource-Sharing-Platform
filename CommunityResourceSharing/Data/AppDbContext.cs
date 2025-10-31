@@ -71,21 +71,6 @@ namespace CommunityResourceSharing.Data
                 .HasForeignKey(s => s.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
-            //// Seed Resource (Owned by Admin User)
-            //modelBuilder.Entity<Resource>().HasData(
-            //    new Resource
-            //    {
-            //        Id = 1,
-            //        Title = "Book",
-            //        Description = "Encyclopedia",
-            //        Category = "Books",
-            //        Status = "Available",
-            //        OwnerId = "1",
-            //        CreatedAt = DateTime.UtcNow
-            //    }
-            //);
-
             modelBuilder.Entity<BorrowRequest>()
                 .HasOne(br => br.Resource)
                 .WithMany(r => r.BorrowRequests)
