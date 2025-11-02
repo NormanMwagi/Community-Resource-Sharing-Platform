@@ -18,8 +18,22 @@ namespace CommunityResourceSharing.Models
 
         [Required]
         public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected, Returned
+        public DateTime? ReturnDate { get; set; } // Nullable for not-yet-returned
+    }
+    //post (doesnt need id)
+    public class BorrowRequestCreate
+    {
+        public int? ResourceId { get; set; }
+        [ForeignKey("ResourceId")]
+        public Resource? Resource { get; set; }
+
+        public string? BorrowerId { get; set; }
+        [ForeignKey("BorrowerId")]
+        public AppUser? Borrower { get; set; }
+
+        [Required]
+        public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected, Returned
 
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
-        public DateTime? ReturnDate { get; set; } // Nullable for not-yet-returned
     }
 }

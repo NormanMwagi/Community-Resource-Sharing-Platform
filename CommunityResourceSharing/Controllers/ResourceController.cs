@@ -41,7 +41,7 @@ namespace CommunityResourceSharing.Controllers
         
         [Authorize(Roles = "User,Admin")]
         [HttpPost]
-        public async Task<ActionResult<ResourceDto>> AddResource(ResourceDto resourceDto)
+        public async Task<ActionResult<ResourceDto>> AddResource(ResourceCreateDto resourceDto)
         {
             var newResource = _mapper.Map<Resource>(resourceDto);
             newResource.CreatedAt = DateTime.UtcNow;
@@ -73,7 +73,6 @@ namespace CommunityResourceSharing.Controllers
             }
 
             _mapper.Map(resourceDto, existingResource);
-            resourceDto.CreatedAt = existingResource.CreatedAt;
 
             try
             {

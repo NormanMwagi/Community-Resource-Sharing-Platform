@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
+using CommunityResourceSharing.Services;
 
 
 namespace CommunityResourceSharing
@@ -29,7 +30,7 @@ namespace CommunityResourceSharing
                 )
             );
 
-
+            builder.Services.AddScoped<TokenService>();
             builder.Services.AddAuthorization();
             builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
             {
@@ -64,6 +65,7 @@ namespace CommunityResourceSharing
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
+                        ValidateLifetime = true, 
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = issuer,
                         ValidAudience = audience,
