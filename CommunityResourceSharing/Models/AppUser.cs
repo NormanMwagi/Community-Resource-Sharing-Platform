@@ -15,5 +15,8 @@ namespace CommunityResourceSharing.Models
         // Navigation properties
         public ICollection<Resource>? Resources { get; set; }
         public ICollection<BorrowRequest>? BorrowRequests { get; set; }
+
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
     }
 }

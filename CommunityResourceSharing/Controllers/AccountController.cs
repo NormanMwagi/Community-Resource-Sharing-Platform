@@ -52,7 +52,7 @@ namespace CommunityResourceSharing.Controllers
 
             var token = _tokenService.GenerateJwtToken(user, roles);
 
-            return Ok(new { token, message = "User registered successfully" });
+            return Ok(new AuthenticatedResponse { Token= token });
         }
 
         // POST: api/account/login
@@ -69,8 +69,11 @@ namespace CommunityResourceSharing.Controllers
            
             var roles = await _userManager.GetRolesAsync(user);
             var token = _tokenService.GenerateJwtToken(user, roles);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
-            return Ok(new { token, message = "Login successful" });
+            return Ok(new AuthenticatedResponse{ Token=token, RefreshToken = refreshToken });
         }
 
         // POST: api/account/logout
